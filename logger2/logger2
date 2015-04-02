@@ -1,0 +1,45 @@
+#!/bin/bash
+
+
+LOGPIPE="/dev/log"
+PIDFILE="/var/run/syslog2.pid"
+
+[ "$(ps -p $(cat ${PIDFILE} 2>/dev/null) 2>/dev/null |grep -v PID|awk '{print $1}' )" == "" ] && {
+	echo "Syslog2 is not running";
+	exit 1;
+}
+
+ID="$(whoami)"
+LABEL="NoLabel"
+
+[ -z "$1" ] && {
+	echo "What do you want to log?";
+	
+	exit 1;
+	} || {
+	TEXT="$1"
+	}
+
+
+
+
+[ "$1" == "-t" ] && {
+	TEXT="";
+	[ ! -z "$2" ] && {
+		[ ! -z "$3" ] && {
+				LABEL="$2";
+				TEXT="$3";
+			} || {
+				echo "I see you gave a label but nothing to log.";
+				exit 1;
+			}
+		} || {
+			echo "So.. what's that label you're talking about?";
+			exit 1;
+		}
+	}
+
+[ ! "$TEXT" == "" ] && {
+#		echo -e "${ID} [${LABEL}] ${TEXT}"
+		echo -e "${ID} [${LABEL}] ${TEXT}" >> ${LOGPIPE}
+	}
